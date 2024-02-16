@@ -10,8 +10,16 @@ import com.google.gson.Gson;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
+@Service
 public class PersonService {
+    private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
+
     private final PersonRepository personRepository;
     private final Gson gson;//Object to convert JSON to Person (or any other class).
 
@@ -20,19 +28,26 @@ public class PersonService {
         this.gson = new Gson();
     }
 
-    public String getAllPersons() {
+    public String getAllPersons() throws Exception {
+        Random random = new Random();
+        logger.info("PersonService:getAllPersons: Retrieving all persons list");
         List<Person> persons = personRepository.getAllPersons();
         return gson.toJson(persons);
     }
 
-    public String getPersonById(int id) {
+    public String getPersonById(Integer id) {
+        logger.info("PersonService:getPersonById: Searching for person id: "+id.toString());
         Person person = personRepository.filterPersons(p -> p.getId() == id).stream()
                 .findFirst()
                 .orElse(null);
+        if(person == null){
+            logger.warn("PersonService::getPersonById:: Person with id: "+ id +" not found!");
+        }
         return gson.toJson(person);
     }
 
     public String addPerson(Person person) {
+        logger.info("PersonService:addPerson: Adding new person...");
         personRepository.addPerson(person);
         return gson.toJson(person);
     }
